@@ -42,16 +42,13 @@ public:
 
     // Создаёт вектор из size элементов, инициализированных значением value
     SimpleVector(size_t size, const Type& value) 
-    : items_(size), size_(size), capacity_(size){
-        //std::fill(begin(), end(), value);
-        for (auto it = begin(); it != end(); ++it) {
-            *it = value;
-        };
+    : items_(size), size_(size), capacity_(size) {
+        std::fill_n(begin(), size_, value);
     }
 
     // Создаёт вектор из std::initializer_list
     SimpleVector(std::initializer_list<Type> init) 
-    : items_(init.size()), size_(init.size()), capacity_(init.size()){
+    : items_(init.size()), size_(init.size()), capacity_(init.size()) {
         std::copy(init.begin(), init.end(), begin());
     }
     
@@ -116,6 +113,7 @@ public:
     // Если перед вставкой значения вектор был заполнен полностью,
     // вместимость вектора должна увеличиться вдвое, а для вектора вместимостью 0 стать равной 1
     Iterator Insert(ConstIterator pos, const Type& value) {
+        assert(pos >= begin() && pos <= end());
         size_t pos_index = pos - cbegin();
         Resize(size_ + 1);
         std::copy_backward(begin() + pos_index, end(), end() + 1);
@@ -124,6 +122,7 @@ public:
     }
 
     Iterator Insert(ConstIterator pos, Type&& value) {
+        assert(pos >= begin() && pos <= end());
         size_t pos_index = pos - cbegin();
         Resize(size_ + 1);
         std::move_backward(begin() + pos_index, end(), end() + 1);
@@ -140,6 +139,7 @@ public:
 
     // Удаляет элемент вектора в указанной позиции
     Iterator Erase(ConstIterator pos) {
+        assert(pos >= begin() && pos <= end());
         size_t pos_index = pos - cbegin();
         std::move(begin()+pos_index+1, end(), begin()+pos_index);
         size_--;
@@ -169,11 +169,13 @@ public:
 
     // Возвращает ссылку на элемент с индексом index
     Type& operator[](size_t index) noexcept {
+        assert(index < size_);
         return items_[index];
     }
 
     // Возвращает константную ссылку на элемент с индексом index
     const Type& operator[](size_t index) const noexcept {
+        assert(index < size_);
         return items_[index];
     }
 
@@ -200,7 +202,7 @@ public:
         size_ = 0;
     }
     
-    void Reserve(size_t new_capacity){
+    void Reserve(size_t new_capacity) {
         if(new_capacity > capacity_){
             SimpleVector new_vec(new_capacity);
             std::move(begin(), end(), new_vec.begin());
